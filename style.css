@@ -1,0 +1,128 @@
+body{
+	background-color: #e4c58893;
+	font-family: 'Maven Pro', sans-serif;
+	/* overflow-x: hidden; */
+}
+
+.obj{
+	display: flex;
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+	object-fit: cover;
+}
+
+.wrapper{
+	position: relative;
+	overflow-y: hidden;
+	overflow-x: visible;
+	width: 800px !important;
+	height: 851px !important;
+}
+
+.field-container{
+	right: 0;
+	position: relative;
+	/* transform: rotate(-45deg); */
+	width: 1000px !important;
+	height: 851px !important;
+}
+
+.field{
+	width: 1000px !important;
+	height: 851px !important;
+	background-image: url('img/field.svg');
+}
+
+.batter{
+	left: 470px;
+	top: 725px;
+	position: absolute;
+	width: 50px;
+	height: 32px;
+	background-image: url('img/batter.png');
+}
+
+.machine{
+	z-index: 99;
+	left: 485px;
+	top: 480px;
+	position: absolute;
+	width: 30px;
+	height: 64px;
+	background-image: url('img/machine.png');
+}
+
+.ball{
+	position: absolute;
+	width: 15px;
+	height: 15px;
+	background-image: url('img/ball.svg');
+	z-index: 999;
+}
+
+.released100, .released90, .released80, .released70, .released60, .released50{
+	animation-name: throwing;
+	animation-timing-function: linear;
+}
+
+.released100{
+	animation-duration: 700ms;
+}
+
+.released90{
+	animation-duration: 770ms;
+}
+
+.released80{
+	animation-duration: 840ms;
+}
+
+.released70{
+	animation-duration: 910ms;
+}
+
+.released60{
+	animation-duration: 980ms;
+}
+
+.released50{
+	animation-duration: 1050ms;
+}
+
+
+@keyframes throwing {
+	0%{
+		left: 493px;
+		top: 520px;
+	}
+	100%{
+		left: 493px;
+		top: 718px;
+	}
+}
+
+.stats{
+	height: 850px;
+}
+
+.foulzone{
+	position: absolute;
+	display: flex;
+	height: 1000px;
+	width: 500px;
+}
+
+.foulzone-left{
+	left: -205px;
+	bottom: -300px;
+	transform: rotate(-45deg);
+	background-color: red;
+}
+
+.foulzone-right{
+	left: 710px;
+	bottom: -300px;
+	transform: rotate(45deg);
+	background-color: aqua;
+}
