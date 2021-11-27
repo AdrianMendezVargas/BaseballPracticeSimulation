@@ -518,7 +518,6 @@ async function HitBallToRandomPosition() {
 	//todo: try to use the id of the pitch to avoid creating a new div for the ball
 	let ball = createBallElement()
 	fieldContainer.appendChild(ball)
-	ball.id = crypto.randomUUID()
 
 	ball.classList.add('flying')
 
