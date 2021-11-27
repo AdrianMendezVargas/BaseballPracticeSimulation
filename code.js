@@ -133,12 +133,55 @@ const summaryModalBodyElement = document.getElementById('summaryModalBody');
 
 const battersHistoryCountElement = document.getElementById('battersHistoryCount');
 
+const sickPlayerProbabilityInput = document.getElementById('sickPlayerProbabilityInput');
+const foulProbabilityInput = document.getElementById('foulProbabilityInput');
+const probabilityIncreaseOnepeatedPitchInput = document.getElementById('probabilityIncreaseOnepeatedPitchInput');
+const sicknessRecoveryPitchsInput = document.getElementById('sicknessRecoveryPitchsInput');
+const pitchPerBatterInput = document.getElementById('pitchPerBatterInput');
+const batterPerSimulationInput = document.getElementById('batterPerSimulationInput');
+
 
 main()
 
 function main() {
+	showVariablesValues()
 	setRandomBatter()
-	//turnMachineOn()
+	addListeners()
+}
+
+function addListeners() {
+	sickPlayerProbabilityInput.addEventListener('change', ()=> {
+		config.sickPlayerProbability = sickPlayerProbabilityInput.value / 100
+	})
+
+	foulProbabilityInput.addEventListener('change', () => {
+		config.foulProbability = foulProbabilityInput.value / 100
+	})
+
+	probabilityIncreaseOnepeatedPitchInput.addEventListener('change', () => {
+		config.probabilityIncreaseOnepeatedPitch = probabilityIncreaseOnepeatedPitchInput.value / 100
+	})
+
+	sicknessRecoveryPitchsInput.addEventListener('change', () => {
+		config.sicknessRecoveryPitchs = sicknessRecoveryPitchsInput.value / 100
+	})
+
+	pitchPerBatterInput.addEventListener('change', () => {
+		config.pitchPerBatter = pitchPerBatterInput.value / 100
+	})
+
+	batterPerSimulationInput.addEventListener('change', () => {
+		config.batterPerSimulation = batterPerSimulationInput.value / 100
+	})
+}
+
+function showVariablesValues() {
+	sickPlayerProbabilityInput.value = config.sickPlayerProbability * 100
+	foulProbabilityInput.value = config.foulProbability * 100
+	probabilityIncreaseOnepeatedPitchInput.value = config.probabilityIncreaseOnepeatedPitch * 100
+	sicknessRecoveryPitchsInput.value = config.sicknessRecoveryPitchs
+	pitchPerBatterInput.value = config.pitchPerBatter
+	batterPerSimulationInput.value = config.batterPerSimulation
 }
 
 function turnMachineOn() {

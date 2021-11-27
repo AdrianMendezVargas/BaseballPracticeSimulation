@@ -202,7 +202,7 @@ body::-webkit-scrollbar {
 	background-color: aqua;
 }
 
-.btn {
+.btn , .form-control{
 	outline: none !important;
 	box-shadow: none !important;
 }
