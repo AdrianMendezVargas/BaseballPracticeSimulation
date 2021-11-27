@@ -166,15 +166,16 @@ function addListeners() {
 	})
 
 	sicknessRecoveryPitchsInput.addEventListener('change', () => {
-		config.sicknessRecoveryPitchs = sicknessRecoveryPitchsInput.value / 100
+		config.sicknessRecoveryPitchs = sicknessRecoveryPitchsInput.value
 	})
 
 	pitchPerBatterInput.addEventListener('change', () => {
-		config.pitchPerBatter = pitchPerBatterInput.value / 100
+		config.pitchPerBatter = pitchPerBatterInput.value
 	})
 
 	batterPerSimulationInput.addEventListener('change', () => {
-		config.batterPerSimulation = batterPerSimulationInput.value / 100
+		debugger
+		config.batterPerSimulation = batterPerSimulationInput.value
 	})
 }
 
