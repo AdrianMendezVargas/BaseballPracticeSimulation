@@ -1,7 +1,26 @@
 body{
-	background-color: #e4c58893;
+	background-color: #EFDDBA;
 	font-family: 'Maven Pro', sans-serif;
 	/* overflow-x: hidden; */
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+	height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: rgba(0, 0, 0, 0.05);;
+}
+
+::-webkit-scrollbar-thumb {
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.2);
+	border-radius: 50px;
+}
+
+body::-webkit-scrollbar {
+    width: 0px;
+	height: 0px;
 }
 
 .obj{
@@ -14,16 +33,16 @@ body{
 
 .wrapper{
 	position: relative;
-	overflow-y: hidden;
+	overflow-y: visible;
 	overflow-x: visible;
 	width: 800px !important;
-	height: 851px !important;
+	height: 850px !important;
 }
 
 .field-container{
 	right: 0;
 	position: relative;
-	/* transform: rotate(-45deg); */
+	transform: rotate(-45deg);
 	width: 1000px !important;
 	height: 851px !important;
 }
@@ -42,6 +61,7 @@ body{
 	height: 32px;
 	background-image: url('img/batter.png');
 	transition-duration: 300ms;
+	z-index: 95;
 }
 
 .machine{
@@ -59,9 +79,25 @@ body{
 	width: 15px;
 	height: 15px;
 	background-image: url('img/ball.svg');
-	z-index: 999;
-	transition-property: all;
-	transition-duration: 1s;
+	transition-property: bottom, left, transform;
+	transition-duration: 1s, 1s, 1050ms;
+	transition-timing-function: ease, ease, linear;
+	z-index: 90;
+}
+
+.ball.flying{
+	z-index: 100;
+	animation-name: spin;
+	animation-duration: 1000ms;
+}
+
+@keyframes spin {
+	0%{
+		transform: rotate(0deg);
+	}
+	100%{
+		transform: rotate(360deg);
+	}
 }
 
 .released100, .released90, .released80, .released70, .released60, .released50{
@@ -106,7 +142,12 @@ body{
 }
 
 .stats{
-	height: 850px;
+	max-height: 750px;
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	background-color: #EFDDBA;
+	z-index: 50;
 }
 
 .foulzone{
@@ -128,4 +169,42 @@ body{
 	bottom: -300px;
 	transform: rotate(45deg);
 	background-color: aqua;
+}
+
+.btn {
+	outline: none !important;
+	box-shadow: none !important;
+}
+
+.btn-outline-primary:hover{
+	background-color: transparent;
+	color: rgb(43, 55, 219);
+}
+
+h4:not(.summaryBattersHeader){
+	border-bottom: 2px solid orange;
+	font-weight: bold;
+}
+
+h1{
+	border-left: 10px solid orange;
+	font-weight: bold;
+	padding-left: 5px;
+}
+
+.batter-record{
+	border-top: 2px solid orange;
+	font-weight: bold;
+}
+
+.batter-record p {
+	margin-bottom: 3px;
+}
+
+.batter-record span{
+	font-weight: 300;
+}
+
+.summaryBattersHeader{
+	text-align: center;
 }

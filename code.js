@@ -5,6 +5,7 @@ class Pitch {
 		this.Type = type
 		this.Speed = speed
 		this.WasHitted = false
+		this.IsFoul = false
 	}
 }
 
@@ -13,24 +14,29 @@ class Batter {
 	constructor(name, sickness, fastball, change, curve, slider, knuckles) {
 		this.Name = name
 		this.Sickness = sickness
+		this.InitialSickness = sickness
 		this.Fastball = fastball
 		this.Change = change
 		this.Curve = curve
 		this.Slider = slider
 		this.Knuckles = knuckles
+		this.HitsPercentage = 0
 		this.PitchHistory = []
 	}
 
 	async swing(pitch) {
-		let contactProbability = this.getContactProbability(pitch, this)
+		let contactProbability = this.getContactProbability(pitch)
 		const willHitTheBall = Math.random() > 1 - (contactProbability / 100)
 
+		//todo: Update indicators here (optional)
 		if (willHitTheBall) {
-			console.log('hitted');
-			await moveBallToRandomPosition()
+			pitch.WasHitted = true
+			pitch.IsFoul = await HitBallToRandomPosition()
 		} else {
-			console.log('---not hitted---');
+
 		}
+
+		this.addPitchTohistory(pitch)
 
 		const batterElement = document.querySelector('.batter');
 		batterElement.style.transform = 'rotate(-90deg)'
@@ -38,9 +44,23 @@ class Batter {
 		batterElement.style.transform = 'rotate(0deg)'
 	}
 
-	getContactProbability(pitch, batter) {
-		let probabilityPercentage = batter[pitch.Type]
-		probabilityPercentage -= sickessProbabilityDecrease[batter.Sickness]
+	addPitchTohistory(pitch) {
+		this.PitchHistory.push(pitch)
+	}
+
+	getContactProbability(pitch) {
+		let probabilityPercentage = this[pitch.Type]
+		probabilityPercentage -= sickessProbabilityDecrease[this.Sickness]
+
+		if (this.PitchHistory.length > 0) {
+
+			const lastPitch = this.PitchHistory[this.PitchHistory.length - 1]
+
+			if (lastPitch.Type == pitch.Type) {
+				probabilityPercentage += (config.probabilityIncreaseOnepeatedPitch * 100)
+			}
+		}
+
 		return probabilityPercentage
 	}
 }
@@ -61,7 +81,12 @@ const SicknessTypes = {
 }
 
 const config = {
-	sickPlayerProbability: 0.40
+	sickPlayerProbability: 0.40,
+	foulProbability: 0.30,
+	sicknessRecoveryPitchs: 2,
+	pitchPerBatter: 10,
+	batterPerSimulation: 5,
+	probabilityIncreaseOnepeatedPitch: 0.10
 }
 
 const sickessProbabilityDecrease = {
@@ -71,22 +96,280 @@ const sickessProbabilityDecrease = {
 	none: 0
 }
 
+let historyBatters = []
+
 const state = {
-	currentBatter : null
+	currentBatter: null,
+	isMachineOn: false
 }
+
+let machineInterval
 
 const fieldContainer = document.querySelector('.field-container');
 const foulzoneLeft = document.querySelector('.foulzone-left');
 const foulzoneRight = document.querySelector('.foulzone-right');
 const ball = document.querySelector('.ball');
 
+const pitchCountElement = document.getElementById('pitchCount');
+const hitsCountElement = document.getElementById('hitsCount');
+const foulsCountElement = document.getElementById('fouldCount');
+const missedCountElement = document.getElementById('missedCount');
+
+const pitchTypeElement = document.getElementById('pitchType');
+const pitchSpeedElement = document.getElementById('speed');
+const batterNameElement = document.getElementById('name');
+const batterHealthElement = document.getElementById('health');
+const fastballPercentageElement = document.getElementById('fastballPercentage');
+const changePercentageElement = document.getElementById('changePercentage');
+const curvePercentageElement = document.getElementById('curvePercentage');
+const sliderPercentageElement = document.getElementById('sliderPercentage');
+const knucklesPercentageElement = document.getElementById('knucklesPercentage');
+const hitsPercentageElement = document.getElementById('hitsPercentage');
+
+const startButtonElement = document.getElementById('startButton');
+
+const summaryDialogElement = document.getElementById('summaryDialog');
+const summaryModalBodyElement = document.getElementById('summaryModalBody');
+
+const battersHistoryCountElement = document.getElementById('battersHistoryCount');
+
+
 main()
 
 function main() {
 	setRandomBatter()
-	// setInterval(() => {
-	// 	pitchAndSwing()
-	// }, 2000);
+	//turnMachineOn()
+}
+
+function turnMachineOn() {
+	startButtonElement.classList.remove('btn-outline-primary')
+	startButtonElement.classList.add('btn-primary')
+	startButtonElement.innerHTML = 'Apagar maquina'
+
+	machineInterval = setInterval(async () => {
+		await pitchAndSwing()
+		updateDinamicStatistics()
+		checkBatterForChange()
+		checkBatterHealth()
+	}, 2000)
+
+	state.isMachineOn = true
+}
+
+function HandleStartClick() {
+	if (state.isMachineOn) {
+		turnMachineOff()
+		
+	} else {
+		turnMachineOn()
+	}
+}
+
+function HandleStopSimulationClick() {
+	changeBatter()
+	showSummary()
+}
+
+function resetSimulation() {
+	historyBatters = []
+	summaryModalBodyElement.innerHTML = ''
+	reserStats()
+}
+
+function turnMachineOff() {
+	startButtonElement.classList.remove('btn-primary')
+	startButtonElement.classList.add('btn-outline-primary')
+	startButtonElement.innerHTML = 'Encender maquina'
+	clearInterval(machineInterval)
+	state.isMachineOn = false
+}
+
+function checkBatterHealth() {
+	if (state.currentBatter.PitchHistory.length >= config.sicknessRecoveryPitchs) {
+		state.currentBatter.Sickness = SicknessTypes.none
+		showBatterInfo()
+	}
+}
+
+function checkBatterForChange() {
+	
+	if (state.currentBatter.PitchHistory.length >= config.pitchPerBatter) {
+		changeBatter()
+	}
+
+	if (historyBatters.length >= config.batterPerSimulation) {
+		showSummary()
+	}
+
+}
+
+function changeBatter() {
+	historyBatters.push(state.currentBatter)
+	setRandomBatter()
+	reserStats()
+}
+
+function showSummary() {
+	turnMachineOff()
+	addSicknessInfoToSummary()
+	addBattersInfoToSummary()
+	showSummaryDialog()
+}
+
+function addSicknessInfoToSummary() {
+	let CommonSicknessElement = createMostCommonSicknessesElement(getMostCommomSicknesses());
+	summaryModalBodyElement.appendChild(CommonSicknessElement);
+}
+
+function showSummaryDialog() {
+	const modal = bootstrap.Modal.getOrCreateInstance(summaryDialogElement);
+	modal.show();
+}
+
+function addBattersInfoToSummary() {
+
+	let headerElement = document.createElement('h4')
+	headerElement.classList.add('summaryBattersHeader')
+	headerElement.innerHTML = 'Detalle de bateadores'
+
+	summaryModalBodyElement.appendChild(headerElement);
+
+	historyBatters.forEach(batter => {
+		let batterRecordElement = createRecordElementFromBatter(batter);
+		summaryModalBodyElement.appendChild(batterRecordElement)
+	});
+}
+
+function createMostCommonSicknessesElement(diseasesArray) {
+	let diseasesElement = document.createElement('div')
+
+	diseasesElement.innerHTML = `
+		<p><strong>Enfermedad mas comun: </strong><span>${diseasesArray.join(', ')}</span></p>
+	`
+	return diseasesElement
+}
+
+function getMostCommomSicknesses() {
+	
+	let fluCount = 0
+	let hangoverCount = 0
+	let badNightCount = 0
+
+	historyBatters.forEach(batter => {
+		if (batter.InitialSickness == SicknessTypes.flu) {
+			fluCount++
+
+		} else if (batter.InitialSickness == SicknessTypes.hangover) {
+			hangoverCount++
+
+		} else if (batter.InitialSickness == SicknessTypes.badNight){
+			badNightCount++
+		}
+	})
+
+	let max = Math.max(fluCount, hangoverCount, badNightCount)
+
+	let commonSickness = []
+	
+	if (max == 0) {
+		commonSickness = ['No hubieron enfermos']
+
+	} else {
+		if (fluCount == max) {
+			commonSickness.push(SicknessTypes.flu)
+
+		}
+		if (hangoverCount == max) {
+			commonSickness.push(SicknessTypes.hangover)
+
+		}
+		if (badNightCount == max) {
+			commonSickness.push(SicknessTypes.badNight)
+
+		}
+	}
+
+	return commonSickness
+}
+
+function createRecordElementFromBatter(batter) {
+
+	let fastballCount = 0
+	let changeCount = 0
+	let curveCount = 0
+	let sliderCount = 0
+	let knucklesCount = 0
+
+	let hits = batter.PitchHistory.filter(pitch => !pitch.IsFoul && pitch.WasHitted)
+
+	hits.forEach(pitch => {
+		if (pitch.Type == PitchTypes.fastball) {
+			fastballCount++
+
+		} else if (pitch.Type == PitchTypes.change) {
+			changeCount++
+
+		} else if (pitch.Type == PitchTypes.curve) {
+			curveCount++
+
+		} else if (pitch.Type == PitchTypes.slider) {
+			sliderCount++
+
+		} else {
+			knucklesCount++
+		}
+	});
+
+	let max = Math.max(fastballCount, changeCount, curveCount, sliderCount, knucklesCount)
+
+	let greatters = []
+
+	if (max == 0) {
+		greatters = ['Ninguno']
+
+	} else {
+
+		if (fastballCount == max) {
+			greatters.push(PitchTypes.fastball)
+
+		}
+		if (changeCount == max) {
+			greatters.push(PitchTypes.change)
+
+		}
+		if (curveCount == max) {
+			greatters.push(PitchTypes.curve)
+
+		}
+		if (sliderCount == max) {
+			greatters.push(PitchTypes.slider)
+
+		} if (knucklesCount == max) {
+			greatters.push(PitchTypes.knuckles)
+		}
+	}
+
+	let recordElement = document.createElement('div')
+	recordElement.classList.add('batter-record', 'd-flex', 'flex-column')
+	recordElement.innerHTML = `
+		<p class="text-center"><strong>${batter.Name}</strong></p>
+		<p><strong>%Bateo: </strong><span>${batter.HitsPercentage}</span></p>
+		<p><strong>Enfermedad: </strong><span>${batter.InitialSickness}</span></p>
+		<p><strong>Lanzamiento favorito: </strong><span>${greatters.join(', ')}</span></p>
+	`
+	return recordElement
+}
+
+function reserStats() {
+	cleanField()
+	updateDinamicStatistics()
+}
+
+function cleanField() {
+	const balls = document.querySelectorAll('.ball')
+	balls.forEach(ballElement => {
+		ballElement.remove()
+	});
 }
 
 function setRandomBatter() {
@@ -99,34 +382,117 @@ function setRandomBatter() {
 		randomIntFromInterval(60, 90), 				//slider
 		randomIntFromInterval(70, 100) 				//knuckles
 	)
+	showBatterInfo()
 }
 
-async function moveBallToRandomPosition() {
+function showBatterInfo() {
+	batterNameElement.innerHTML = state.currentBatter.Name
+	batterHealthElement.innerHTML = state.currentBatter.Sickness + ' (-' + sickessProbabilityDecrease[state.currentBatter.Sickness] + '%)'
+	fastballPercentageElement.innerHTML = state.currentBatter.Fastball + '%'
+	changePercentageElement.innerHTML = state.currentBatter.Change + '%'
+	curvePercentageElement.innerHTML = state.currentBatter.Curve + '%'
+	sliderPercentageElement.innerHTML = state.currentBatter.Slider + '%'
+	knucklesPercentageElement.innerHTML = state.currentBatter.Knuckles + '%'
+}
+
+function updateDinamicStatistics() {
+	//Pitches
+	let hitsCount = 0
+	let foulsCount = 0
+	let missedCount = 0
+
+	state.currentBatter.PitchHistory.forEach(pitch => {
+		if (!pitch.WasHitted) {
+			missedCount++
+		} else {
+			if (pitch.IsFoul) {
+				foulsCount++
+			} else {
+				hitsCount++
+			}
+		}
+	});
+
+	pitchCountElement.innerHTML = state.currentBatter.PitchHistory.length
+	hitsCountElement.innerHTML = hitsCount
+	foulsCountElement.innerHTML = foulsCount
+	missedCountElement.innerHTML = missedCount
+
+	let hitsPercentage = ((hitsCount / state.currentBatter.PitchHistory.length) * 100).toPrecision(4) + '%'
+	state.currentBatter.HitsPercentage = hitsPercentage
+
+	hitsPercentageElement.innerHTML = hitsPercentage
+
+	//Batters History Count
+	battersHistoryCountElement.innerHTML = historyBatters.length
+}
+
+function setCurrentPitch(pitch) {
+	pitchTypeElement.innerHTML = pitch.Type
+	pitchSpeedElement.innerHTML = pitch.Speed
+}
+
+async function HitBallToRandomPosition() {
 	let x = randomIntFromInterval(1, 1000)
-	let y = randomIntFromInterval(1, 1000)
+	let y = randomIntFromInterval(-100, 900)
 
+	let isFoul = isFoulZone(x, y)
+
+	const willBeFoul = Math.random() < config.foulProbability
+	
+	if (!willBeFoul && isFoul) { //should be hit but is foul
+		y = y <= 110
+			? randomIntFromInterval(111, 900)
+			: y
+		
+		if (x > 500) {
+			while (isFoulZone(x, y)) {
+				x -= randomIntFromInterval(20, 80)
+				x = x < 500 ? 500 : x
+			}
+		}else {
+			while (isFoulZone(x, y)) {
+				x += randomIntFromInterval(20, 80)
+				x = x > 500 ? 500 : x
+			}
+		}
+	} else if (willBeFoul && !isFoul) { //should be foul but is hit
+
+		if (x > 500) {
+			while (!isFoulZone(x, y)) {
+				x += randomIntFromInterval(20, 80)
+			}
+		} else {
+			while (!isFoulZone(x, y)) {
+				x -= randomIntFromInterval(20, 80)
+			}
+		}
+	}
+	
 	//todo: try to use the id of the pitch to avoid creating a new div for the ball
-
 	let ball = document.createElement('div')
 	fieldContainer.appendChild(ball)
 	ball.id = crypto.randomUUID()
 	ball.classList.add('obj', 'ball', 'flying')
-	ball.style.top = '718px'
+	ball.style.bottom = '115px'
 	ball.style.left = '493px'
 
 	await sleep(50)
-	ball.style.top = `${y}px`
+	sleep(1000).then(() => {
+		ball.classList.remove('flying')
+	})
+
+	ball.style.bottom = `${y}px`
 	ball.style.left = `${x}px`
 
-	let isFoul = isFoulPitch(x, y)
+	return isFoulZone(x, y)
 }
 
-function isFoulPitch(x2, y2) {
-	const y1 = 735
+function isFoulZone(x2, y2) {
+	const y1 = 110
 	const x1 = 500
 
-	if (y2 > y1) {
-		console.log('foul y')
+	if (y2 < y1) {
 		return true
 	}
 
@@ -135,7 +501,6 @@ function isFoulPitch(x2, y2) {
 
 
 	if (angle > -45 && angle < 45) {
-		console.log('foul')
 		return true
 	}
 
@@ -169,15 +534,19 @@ async function pitchAndSwing() {
 
 async function throwBall() {
 	let pitch = getRandomPitch()
+	setCurrentPitch(pitch)
 
 	let ball = document.createElement('div')
-	ball.classList.add('obj','ball', 'released'+pitch.Speed)
+	ball.classList.add('obj', 'ball', 'released' + pitch.Speed)
 
 	fieldContainer.appendChild(ball)
 
+	await sleep(50)
+	ball.style.transform = 'rotate(360deg)'
+
 	let ballDuration = 700 + ((10 - (pitch.Speed / 10) ) * 70)
 
-	await sleep(ballDuration)
+	await sleep(ballDuration - 50)
 	ball.remove();
 	
 	return pitch

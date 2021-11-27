@@ -13,33 +13,48 @@
 	<title>Practica de bateo</title>
 </head>
 <body class="min-vh-100">
-	<div class="containter-fluid justify-content-center align-items-center ps-3 pe-0">
+	<div class="containter-fluid ps-3 pe-0">
 		<div class="row mt-3">
-			<h1 class="text-center">Simulacion de bateo</h1>
+			<div class="d-block">
+				<div class="d-flex justify-content-center">
+					<h1 class="text-center w-auto"><strong>Simulacion de bateo</strong></h1>
+				</div>
+			</div>
 		</div>
 		<div class="row">
-			<!-- <div class="stats col d-flex flex-column">
-				<h3 class="text-center mb-4">Indicadores</h3>
-				<p><strong>Personas en el tren: </strong><span id="peopleInTrain"></span></p>
-				<p><strong>Personas en espera del tren: </strong><span id="peopleWaitingTrain"></span></p>
-				<p><strong>Personas rechazadas: </strong><span id="peopleRejected"></span></p>
-				<p><strong>Ingresos: $</strong><span id="income"></span></p>
-				<h5 class="mt-4">Detalles pasajeros</h5>
-				<p><strong>Total pasajeros: </strong><span id="totalPassengers"></span></p>
-				<p><strong>Total hombres: </strong><span id="totalMenPassengers"></span></p>
-				<div class="d-flex">
-					<p><strong>Total mujeres: </strong><span id="totalWomenPassengers"></span></p>
-					<p class="ms-5"><strong>Total embarazadas: </strong><span id="totalPregnantPassengers"></span></p>
+			<div class="col w-100">
+				<div class="stats d-flex flex-column overflow-auto pe-3">
+					<h4 class="mt-4">Indicadores</h4>
+					<p><strong>Bateadores simulados: </strong><span id="battersHistoryCount"></span></p>
+
+					<h4>Lanzamientos</h4>
+					<p><strong>Lanzamientos: </strong><span id="pitchCount"></span></p>
+					<p><strong>Hits: </strong><span id="hitsCount"></span></p>
+					<p><strong>Fouls: </strong><span id="fouldCount"></span></p>
+					<p><strong>Sin contacto: </strong><span id="missedCount"></span></p>
+
+					<h4>Lanzamiento actual</h4>
+					<p><strong>Tipo: </strong><span id="pitchType"></span></p>
+					<p><strong>Velocidad: </strong><span id="speed"></span></p>
+					
+					<h4>Sobre el bateador</h4>
+					
+					<p><strong>Nombre: </strong><span id="name"></span></p>
+					<p><strong>Estado de salud: </strong><span id="health"></span></p>
+					
+					<h4>Estadisticas del bateador</h4>
+
+					<p><strong>Recta: </strong><span id="fastballPercentage"></span></p>
+					<p><strong>Cambio: </strong><span id="changePercentage"></span></p>
+					<p><strong>Curva: </strong><span id="curvePercentage"></span></p>
+					<p><strong>Slider: </strong><span id="sliderPercentage"></span></p>
+					<p><strong>Nudillos: </strong><span id="knucklesPercentage"></span></p>
+					<p><strong>% Bateo (Actual): </strong><span id="hitsPercentage"></span></p>
+					
+					<p><button id="startButton" class="btn btn-outline-primary" onclick="HandleStartClick()">Encender maquina</button></p>
+					<p><button id="stopSimulatioButton" class="btn btn-danger" onclick="HandleStopSimulationClick()">Detener simulacion</button></p>
+					
 				</div>
-				<p><strong>Total niños: </strong><span id="totalKidPassengers"></span></p>
-				<p><button class="btn btn-primary" onclick="HandleStartClick()">Iniciar simulacion</button></p>
-				<div class="form-check">
-					<input class="form-check-input" onchange="HandleTootipsCheck()" type="checkbox" value=""
-						id="flexCheckDefault">
-					<label class="form-check-label" for="flexCheckDefault">
-						Mostrar infomacion de estacion siempre
-					</label>
-				</div> -->
 			</div>
 			<div class="col-auto d-flex justify-content-end">
 				<div class="wrapper pt-3">
@@ -47,13 +62,24 @@
 						<div class="obj field"></div>
 						<div class="obj batter"></div>
 						<div class="obj machine"></div>
-						<div class="obj ball"></div>
 					</div>
 				</div>
 			</div>
 		</div>
-		<div class="row mt-5 d-flex justify-content-center">
-
+		<div id="summaryDialog" class="modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+			<div class="modal-dialog modal-dialog-scrollable">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">Resumen</h5>
+						<button type="button" class="btn-close" onclick="resetSimulation()" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div id="summaryModalBody" class="modal-body">
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" onclick="resetSimulation()" data-bs-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 
