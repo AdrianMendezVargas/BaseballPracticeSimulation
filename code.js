@@ -31,6 +31,7 @@ class Batter {
 		//todo: Update indicators here (optional)
 		if (willHitTheBall) {
 			pitch.WasHitted = true
+			playBatSound()
 			pitch.IsFoul = await HitBallToRandomPosition()
 		} else {
 
@@ -532,6 +533,11 @@ async function HitBallToRandomPosition() {
 	ball.style.left = `${x}px`
 
 	return isFoulZone(x, y)
+}
+
+function playBatSound() {
+	var audio = new Audio('hit.mp3');
+	audio.play();
 }
 
 function isFoulZone(x2, y2) {
