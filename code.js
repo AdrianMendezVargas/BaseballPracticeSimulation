@@ -104,6 +104,8 @@ const state = {
 	isMachineOn: false
 }
 
+const hitSound = new Audio('hit.mp3')
+
 let machineInterval
 
 const fieldContainer = document.querySelector('.field-container');
@@ -536,8 +538,7 @@ async function HitBallToRandomPosition() {
 }
 
 function playBatSound() {
-	var audio = new Audio('hit.mp3');
-	audio.play();
+	hitSound.play()
 }
 
 function isFoulZone(x2, y2) {
