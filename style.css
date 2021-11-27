@@ -74,6 +74,18 @@ body::-webkit-scrollbar {
 	background-image: url('img/machine.png');
 }
 
+.ballContainer{
+	position: absolute;
+	transition-property: bottom, left, transform;
+	transition-duration: 1s, 1s, 1050ms;
+	transition-timing-function: ease, ease, linear;
+	z-index: 90;
+	width: 15px;
+	height: 15px;
+	
+	border-radius: 50%;
+}
+
 .ball{
 	position: absolute;
 	width: 15px;
@@ -85,10 +97,29 @@ body::-webkit-scrollbar {
 	z-index: 90;
 }
 
-.ball.flying{
+.flying.ballContainer{
+	z-index: 100;
+	animation-name: up;
+	animation-duration: 1000ms;
+}
+
+.flying .ball{
 	z-index: 100;
 	animation-name: spin;
 	animation-duration: 1000ms;
+}
+
+@keyframes up {
+	0%{
+		transform: scale(1)
+	}
+	50%{
+		transform: scale(1.5);
+		filter: drop-shadow(-30px 15px 4px rgba(0, 0, 0, 0.5));
+	}
+	100%{
+		transform: scale(1)
+	}
 }
 
 @keyframes spin {

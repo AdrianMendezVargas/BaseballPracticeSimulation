@@ -366,7 +366,7 @@ function reserStats() {
 }
 
 function cleanField() {
-	const balls = document.querySelectorAll('.ball')
+	const balls = document.querySelectorAll('.ballContainer')
 	balls.forEach(ballElement => {
 		ballElement.remove()
 	});
@@ -470,10 +470,13 @@ async function HitBallToRandomPosition() {
 	}
 	
 	//todo: try to use the id of the pitch to avoid creating a new div for the ball
-	let ball = document.createElement('div')
+	let ball = createBallElement()
 	fieldContainer.appendChild(ball)
 	ball.id = crypto.randomUUID()
-	ball.classList.add('obj', 'ball', 'flying')
+
+	ball.classList.add('flying')
+
+	ball.firstChild.classList.add('flying')
 	ball.style.bottom = '115px'
 	ball.style.left = '493px'
 
@@ -532,17 +535,28 @@ async function pitchAndSwing() {
 	await state.currentBatter.swing(pitch)
 }
 
+function createBallElement(pitch = null) {
+	let ballContainer = document.createElement('div')
+	ballContainer.classList.add('ballContainer')
+
+	pitch ? ballContainer.classList.add('released' + pitch.Speed) : ''
+
+	let ball = document.createElement('div')
+	ball.classList.add('obj', 'ball')
+	ballContainer.appendChild(ball)
+	return ballContainer
+}
+
 async function throwBall() {
 	let pitch = getRandomPitch()
 	setCurrentPitch(pitch)
 
-	let ball = document.createElement('div')
-	ball.classList.add('obj', 'ball', 'released' + pitch.Speed)
+	let ball = createBallElement(pitch)
 
 	fieldContainer.appendChild(ball)
 
 	await sleep(50)
-	ball.style.transform = 'rotate(360deg)'
+	ball.firstChild.style.transform = 'rotate(360deg)'
 
 	let ballDuration = 700 + ((10 - (pitch.Speed / 10) ) * 70)
 
@@ -551,12 +565,6 @@ async function throwBall() {
 	
 	return pitch
 }
-
-
-function isFoul() {
-	
-}
-
 
 
 function getRandomPitch() {
